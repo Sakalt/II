@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ⅱ世界線 Windows バージョン</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .room {
+            display: none;
+            margin-bottom: 20px;
+        }
+        .active {
+            display: block;
+        }
+        .navigation {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 200px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ⅱ世界線 Windows バージョン</h1>
+    
+    <div id="group1" class="room active">
+        <h2>Windows12-14 (グループ1)</h2>
+        <img src="logo/roomGroup1.png" alt="Group 1 Logo">
+        <button onclick="playGroupSound('group1')">Play Group Sound</button>
+    </div>
+    <div id="group2" class="room">
+        <h2>Windows15-18 (グループ2)</h2>
+        <img src="logo/roomGroup2.png" alt="Group 2 Logo">
+        <button onclick="playGroupSound('group2')">Play Group Sound</button>
+    </div>
+    <div id="group3" class="room">
+        <h2>Windows19-22 (グループ3)</h2>
+        <img src="logo/roomGroup3.png" alt="Group 3 Logo">
+        <button onclick="playGroupSound('group3')">Play Group Sound</button>
+    </div>
+    <div id="group4" class="room">
+        <h2>Windows23-27 (グループ4)</h2>
+        <img src="logo/roomGroup4.png" alt="Group 4 Logo">
+        <button onclick="playGroupSound('group4')">Play Group Sound</button>
+    </div>
+    <div id="group5" class="room">
+        <h2>Windows28-32 (グループ5)</h2>
+        <img src="logo/roomGroup5.png" alt="Group 5 Logo">
+        <button onclick="playGroupSound('group5')">Play Group Sound</button>
+    </div>
+
+    <div class="navigation">
+        <button onclick="showRoom('group1')">Group 1</button>
+        <button onclick="showRoom('group2')">Group 2</button>
+        <button onclick="showRoom('group3')">Group 3</button>
+        <button onclick="showRoom('group4')">Group 4</button>
+        <button onclick="showRoom('group5')">Group 5</button>
+    </div>
+
+    <script>
+        let audioContext;
+
+        const soundPatterns = {
+            'group1': ['C5', 'E5', 'G5'],
+            'group2': ['D5', 'F5', 'A5'],
+            'group3': ['E5', 'G5', 'B5'],
+            'group4': ['F5', 'A5', 'C6'],
+            'group5': ['G5', 'B5', 'D6']
+        };
+
+        function getFrequency(note) {
+            const frequencies = {
+                'C5': 523.25,
+                'D5': 587.33,
+                'E5': 659.25,
+                'F5': 698.46,
+                'G5': 783.99,
+                'A5': 880.00,
+                'B5': 987.77,
+                'C6': 1046.50,
+                'D6': 1174.66,
+                'E6': 1318.51,
+                'F6': 1396.91,
+                'G6': 1567.98
+            };
+            return frequencies[note] || 440.00;
+        }
+
+        function playTone(frequency, duration) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+            // Apply a fade-in effect
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.1);
+            gainNode.gain.linearRampToValueAtTime(0.5, audioContext.currentTime + duration - 0.1);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        async function playGroupSound(groupId) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            const pattern = soundPatterns[groupId];
+            if (!pattern) {
+                console.error('No sound pattern found for group:', groupId);
+                return;
+            }
+
+            let delay = 0;
+            pattern.forEach(note => {
+                const frequency = getFrequency(note);
+                playTone(frequency, 0.5);
+                delay += 0.6; // Add a bit of delay between tones
+            });
+        }
+
+        function showRoom(roomId) {
+            const rooms = document.querySelectorAll('.room');
+            rooms.forEach(room => room.classList.remove('active'));
+            document.getElementById(roomId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
